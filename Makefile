@@ -1,4 +1,4 @@
-all: clean build run
+all: clean init build run
 
 run:
 	./bin/flying-toasters -windowed
@@ -8,3 +8,6 @@ build:
 
 clean:
 	rm -f bin/flying-toasters
+
+init:
+	mkdir -p bin
