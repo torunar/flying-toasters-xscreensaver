@@ -166,7 +166,7 @@ Window createWindow(Display *display, int isInRoot) {
                 BlackPixel(display, DefaultScreen(display)),
                 BlackPixel(display, DefaultScreen(display))
         );
-        XStoreName(display, window, "flying-toasters-2d");
+        XStoreName(display, window, "flying-toasters");
         XSelectInput(display, window, StructureNotifyMask);
         XMapRaised(display, window);
         do {
@@ -223,15 +223,17 @@ void loadSprites(
 }
 
 void setToasterSpawnCoordinates(struct Toaster *toaster, int spawnWidth) {
+    int yPosition = 5 + (int) random() % 3;
     int cellWidth = spawnWidth / TOASTER_COUNT;
-    toaster->x = toaster->i * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
-    toaster->y = -SPRITE_SIZE * (5 + (int) random() % 3);
+    toaster->x = (toaster->i + yPosition - 1) * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
+    toaster->y = -SPRITE_SIZE * yPosition;
 }
 
 void setToastSpawnCoordinates(struct Toast *toast, int spawnWidth) {
+    int yPosition = 1 + (int) random() % 3;
     int cellWidth = spawnWidth / TOAST_COUNT;
-    toast->x = toast->i * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
-    toast->y = -SPRITE_SIZE * (1 + (int) random() % 3);
+    toast->x = (toast->i + yPosition - 1) * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
+    toast->y = -SPRITE_SIZE * yPosition;
 }
 
 void spawnToasters(int spawnWidth, struct Toaster *toasters) {
