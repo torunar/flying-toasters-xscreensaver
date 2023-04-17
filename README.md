@@ -15,7 +15,7 @@ Classic [After Dark](https://en.wikipedia.org/wiki/After_Dark_(software)) screen
     - GL:                           superquadrics -root                         \n\
     ...
     - GL:                           sphereeversion -root                        \n\
-                                    /usr/local/bin/bin/flying-toasters          \n\
+                                    /usr/local/bin/flying-toasters              \n\
     ```
 4. Launch XScreensaver and select "Flying-toasters" as your screensaver. It has no settings.
 
