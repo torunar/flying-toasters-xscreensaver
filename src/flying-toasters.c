@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include "../img/toast.xpm"
 #include "../img/toaster.xpm"
 #include "vroot.h"
@@ -10,8 +11,15 @@
 #define TOASTER_COUNT 10
 #define TOAST_COUNT 6
 #define SPRITE_SIZE 64
+#define GRID_WIDTH 4
+#define GRID_HEIGHT 4
+#define MAX_TOASTER_SPEED 4
+#define MAX_TOAST_SPEED 3
+#define FPS 60
 
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
+
     Display *display;
     Window window;
     GC graphicContext;
@@ -39,13 +47,14 @@ int main(int argc, char *argv[]) {
             windowAttributes.depth
     );
 
-    int spawnWidth = windowAttributes.width + windowAttributes.height;
     loadSprites(display, window, toasterSprites, toasterClipMasks, &toastSprite, &toastClipMask);
-    spawnToasters(spawnWidth, toasters);
-    spawnToasts(spawnWidth, toasts);
 
     int frameCounter = 0;
     int newX, newY, i, j;
+    int *grid = initGrid();
+
+    spawnToasters(toasters, windowAttributes.width, windowAttributes.height, grid);
+    spawnToasts(toasts, windowAttributes.width, windowAttributes.height, grid);
 
     while (1) {
         XSetForeground(display, graphicContext, BlackPixelOfScreen(DefaultScreenOfDisplay(display)));
@@ -60,15 +69,8 @@ int main(int argc, char *argv[]) {
             newX = toasts[i].x - toasts[i].moveDistance;
             newY = toasts[i].y + toasts[i].moveDistance;
             if (isScrolledOutOfScreen(newX, newY, windowAttributes.height)) {
-                setToastSpawnCoordinates(&toasts[i], spawnWidth);
+                setToastSpawnCoordinates(&toasts[i], windowAttributes.width, windowAttributes.height);
                 continue;
-            }
-
-            for (j = 0; j < TOAST_COUNT; j++) {
-                if ((i != j) && hasSpriteCollision(toasts[j].x, toasts[j].y, newX, newY, 5)) {
-                    newX = toasts[i].x - toasts[j].moveDistance;
-                    newY = toasts[i].y + toasts[j].moveDistance;
-                }
             }
 
             toasts[i].x = newX;
@@ -91,7 +93,7 @@ int main(int argc, char *argv[]) {
             newX = toasters[i].x - toasters[i].moveDistance;
             newY = toasters[i].y + toasters[i].moveDistance;
             if (isScrolledOutOfScreen(newX, newY, windowAttributes.height)) {
-                setToasterSpawnCoordinates(&toasters[i], spawnWidth);
+                setToasterSpawnCoordinates(&toasters[i], windowAttributes.width, windowAttributes.height);
                 continue;
             }
 
@@ -128,7 +130,7 @@ int main(int argc, char *argv[]) {
         );
         XFlush(display);
 
-        usleep(1000000 / 60); // 60 fps
+        usleep(1000000 / FPS);
     }
 
     XCloseDisplay(display);
@@ -160,8 +162,8 @@ Window createWindow(Display *display, int isInRoot) {
                 window,
                 200,
                 200,
-                1024,
-                768,
+                1920,
+                1080,
                 1,
                 BlackPixel(display, DefaultScreen(display)),
                 BlackPixel(display, DefaultScreen(display))
@@ -222,34 +224,34 @@ void loadSprites(
     clipMask = NULL;
 }
 
-void setToasterSpawnCoordinates(struct Toaster *toaster, int spawnWidth) {
-    int yPosition = 5 + (int) random() % 3;
-    int cellWidth = spawnWidth / TOASTER_COUNT;
-    toaster->x = (toaster->i + yPosition - 1) * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
-    toaster->y = -SPRITE_SIZE * yPosition;
+void setToasterSpawnCoordinates(struct Toaster *toaster, int screenWidth, int screenHeight) {
+    int slotWidth = screenWidth / GRID_WIDTH;
+    int slotHeight = screenHeight / GRID_HEIGHT;
+    toaster->x = screenHeight + (toaster->slot % GRID_WIDTH) * slotWidth + (slotWidth - SPRITE_SIZE) / 2;
+    toaster->y = -screenHeight + (toaster->slot / GRID_HEIGHT) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
 }
 
-void setToastSpawnCoordinates(struct Toast *toast, int spawnWidth) {
-    int yPosition = 1 + (int) random() % 3;
-    int cellWidth = spawnWidth / TOAST_COUNT;
-    toast->x = (toast->i + yPosition - 1) * cellWidth + (cellWidth - SPRITE_SIZE) / 2;
-    toast->y = -SPRITE_SIZE * yPosition;
+void setToastSpawnCoordinates(struct Toast *toast, int screenWidth, int screenHeight) {
+    int slotWidth = screenWidth / GRID_WIDTH;
+    int slotHeight = screenHeight / GRID_HEIGHT;
+    toast->x = screenHeight + (toast->slot % GRID_WIDTH) * slotWidth + (slotWidth - SPRITE_SIZE) / 2;
+    toast->y = -screenHeight + (toast->slot / GRID_HEIGHT) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
 }
 
-void spawnToasters(int spawnWidth, struct Toaster *toasters) {
+void spawnToasters(struct Toaster *toasters, int screenWidth, int screenHeight, int *grid) {
     for (int i = 0; i < TOASTER_COUNT; i++) {
-        toasters[i].i = i;
-        toasters[i].moveDistance = 1 + (int) random() % 4;
-        toasters[i].currentFrame = (int) random() % TOASTER_SPRITE_COUNT;
-        setToasterSpawnCoordinates(&toasters[i], spawnWidth);
+        toasters[i].slot = grid[i];
+        toasters[i].moveDistance = 1 + rand() % MAX_TOASTER_SPEED;
+        toasters[i].currentFrame = rand() % TOASTER_SPRITE_COUNT;
+        setToasterSpawnCoordinates(&toasters[i], screenWidth, screenHeight);
     }
 }
 
-void spawnToasts(int spawnWidth, struct Toast *toasts) {
+void spawnToasts(struct Toast *toasts, int screenWidth, int screenHeight, int *grid) {
     for (int i = 0; i < TOAST_COUNT; i++) {
-        toasts[i].i = i;
-        toasts[i].moveDistance = 1 + (int) random() % 3;
-        setToastSpawnCoordinates(&toasts[i], spawnWidth);
+        toasts[i].slot = grid[TOASTER_COUNT + TOAST_COUNT - 1 - i];
+        toasts[i].moveDistance = 1 + rand() % MAX_TOAST_SPEED;
+        setToastSpawnCoordinates(&toasts[i], screenWidth, screenHeight);
     }
 }
 
@@ -277,4 +279,22 @@ void drawSprite(
             SPRITE_SIZE
     );
     XSetClipMask(display, graphicContext, None);
+}
+
+int *initGrid() {
+    static int grid[TOASTER_COUNT + TOAST_COUNT];
+    int i, j;
+
+    for (i = 0; i < TOASTER_COUNT + TOAST_COUNT; i++) {
+        grid[i] = i;
+    }
+
+    for (i = 0; i < TOASTER_COUNT + TOAST_COUNT - 1; i++) {
+        j = i + rand() % (TOASTER_COUNT + TOAST_COUNT - i);
+        int t = grid[j];
+        grid[j] = grid[i];
+        grid[i] = t;
+    }
+
+    return grid;
 }

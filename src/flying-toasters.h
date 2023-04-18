@@ -2,7 +2,7 @@
 #include <X11/xpm.h>
 
 struct Toaster {
-    int i;
+    int slot;
     int x;
     int y;
     int moveDistance;
@@ -10,7 +10,7 @@ struct Toaster {
 };
 
 struct Toast {
-    int i;
+    int slot;
     int x;
     int y;
     int moveDistance;
@@ -33,13 +33,13 @@ void loadSprites(
         Pixmap *toastClipMask
 );
 
-void setToasterSpawnCoordinates(struct Toaster *toaster, int spawnWidth);
+void setToasterSpawnCoordinates(struct Toaster *toaster, int screenWidth, int screenHeight);
 
-void setToastSpawnCoordinates(struct Toast *toast, int spawnWidth);
+void setToastSpawnCoordinates(struct Toast *toast, int screenWidth, int screenHeight);
 
-void spawnToasters(int spawnWidth, struct Toaster *toasters);
+void spawnToasters(struct Toaster *toasters, int screenWidth, int screenHeight, int *grid);
 
-void spawnToasts(int spawnWidth, struct Toast *toasts);
+void spawnToasts(struct Toast *toasts, int screenWidth, int screenHeight, int *grid);
 
 void drawSprite(
         Display *display,
@@ -50,3 +50,5 @@ void drawSprite(
         int x,
         int y
 );
+
+int *initGrid();
