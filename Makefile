@@ -1,9 +1,4 @@
-all: clean init build run
-
-run:
-	./bin/flying-toasters -windowed
-
-build:
+build: init clean
 	gcc -o bin/flying-toasters src/flying-toasters.c -L/usr/lib -lX11 -lXpm -s -W -Wall
 
 clean:
@@ -11,3 +6,8 @@ clean:
 
 init:
 	mkdir -p bin
+
+run:
+	./bin/flying-toasters -windowed
+
+all: build run

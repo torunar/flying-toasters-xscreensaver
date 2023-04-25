@@ -21,5 +21,6 @@ Classic [After Dark](https://en.wikipedia.org/wiki/After_Dark_(software)) screen
 
 ## Building locally
 
-1. Install `libx11-dev` and `libxpm-dev` libraries.
-2. Run `make all` from the source code directory.
+1. Install `gcc` and `libx11-dev` and `libxpm-dev` libraries.
+2. Run `make build` from the source code directory to build from source.
+3. Built screensaver will be put into the `bin` directory. Type `make run` to preview it in windowed mode.
