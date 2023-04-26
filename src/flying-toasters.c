@@ -228,14 +228,14 @@ void setToasterSpawnCoordinates(struct Toaster *toaster, int screenWidth, int sc
     int slotWidth = screenWidth / GRID_WIDTH;
     int slotHeight = screenHeight / GRID_HEIGHT;
     toaster->x = screenHeight + (toaster->slot % GRID_WIDTH) * slotWidth + (slotWidth - SPRITE_SIZE) / 2;
-    toaster->y = -screenHeight + (toaster->slot / GRID_HEIGHT) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
+    toaster->y = -screenHeight + (toaster->slot / GRID_WIDTH) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
 }
 
 void setToastSpawnCoordinates(struct Toast *toast, int screenWidth, int screenHeight) {
     int slotWidth = screenWidth / GRID_WIDTH;
     int slotHeight = screenHeight / GRID_HEIGHT;
     toast->x = screenHeight + (toast->slot % GRID_WIDTH) * slotWidth + (slotWidth - SPRITE_SIZE) / 2;
-    toast->y = -screenHeight + (toast->slot / GRID_HEIGHT) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
+    toast->y = -screenHeight + (toast->slot / GRID_WIDTH) * slotHeight + (slotHeight - SPRITE_SIZE) / 2;
 }
 
 void spawnToasters(struct Toaster *toasters, int screenWidth, int screenHeight, int *grid) {
@@ -249,7 +249,7 @@ void spawnToasters(struct Toaster *toasters, int screenWidth, int screenHeight, 
 
 void spawnToasts(struct Toast *toasts, int screenWidth, int screenHeight, int *grid) {
     for (int i = 0; i < TOAST_COUNT; i++) {
-        toasts[i].slot = grid[TOASTER_COUNT + TOAST_COUNT - 1 - i];
+        toasts[i].slot = grid[TOASTER_COUNT + i];
         toasts[i].moveDistance = 1 + rand() % MAX_TOAST_SPEED;
         setToastSpawnCoordinates(&toasts[i], screenWidth, screenHeight);
     }
