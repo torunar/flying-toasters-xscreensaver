@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 2 -*-                                             */
 /*****************************************************************************/
 /**                   Copyright 1991 by Andreas Stolcke                     **/
 /**               Copyright 1990 by Solbourne Computer Inc.                 **/
@@ -52,18 +53,42 @@
  * - replaced all NULL's with properly cast 0's, 5/6/91
  * - free children list (suggested by Mark Martin <mmm@cetia.fr>), 5/16/91
  * - include X11/Xlib.h and support RootWindowOfScreen, too 9/17/91
+ *
+ * Jamie Zawinski <jwz@jwz.org>, 28-Apr-1997
+ * - use ANSI C
+ *
+ * Jamie Zawinski <jwz@jwz.org>, 3-Sep-2003
+ * - if the environment variable "XSCREENSAVER_WINDOW" is set, use that
+ *   as the root window instead of searching for __SWM_VROOT.
+ *
+ * Jamie Zawinski <jwz@jwz.org>, 14-Aug-2004
+ * - changes to get gcc to stop whining about "type punning".
+ *
+ * Jamie Zawinski <jwz@jwz.org>, 16-Dec-2004
+ * - fixed that last fix.
  */
 
 #ifndef _VROOT_H_
 #define _VROOT_H_
+#define _XSCREENSAVER_VROOT_H_
+
+#if !defined(lint) && !defined(SABER)
+static const char vroot_rcsid[] =
+ "#Id: vroot.h,v 1.8 2004/12/16 05:33:54 jwz Exp #" "\n"
+ "#Id: vroot.h,v 1.4 1991/09/30 19:23:16 stolcke Exp stolcke #";
+#endif
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
+#include <stdio.h>
 
 static Window
-VirtualRootWindowOfScreen(screen)
-	Screen *screen;
+#ifdef __STDC__ /* ANSIfication added by jwz, to avoid superfluous warnings. */
+VirtualRootWindowOfScreen(Screen *screen)
+#else /* !__STDC__ */
+VirtualRootWindowOfScreen(screen) Screen *screen;
+#endif /* !__STDC__ */
 {
 	static Screen *save_screen = (Screen *)0;
 	static Window root = (Window)0;
@@ -71,9 +96,22 @@ VirtualRootWindowOfScreen(screen)
 	if (screen != save_screen) {
 		Display *dpy = DisplayOfScreen(screen);
 		Atom __SWM_VROOT = None;
-        unsigned int i;
+		unsigned int i;
 		Window rootReturn, parentReturn, *children;
 		unsigned int numChildren;
+
+    /* first check for a hex or decimal window ID in the environment */
+    const char *xss_id = getenv("XSCREENSAVER_WINDOW");
+    if (xss_id && *xss_id) {
+      unsigned long id = 0;
+      char c;
+      if (1 == sscanf (xss_id, " 0x%lx %c", &id, &c) ||
+          1 == sscanf (xss_id, " %lu %c",   &id, &c)) {
+        root = (Window) id;
+        save_screen = screen;
+        return root;
+      }
+    }
 
 		root = RootWindowOfScreen(screen);
 
@@ -85,15 +123,15 @@ VirtualRootWindowOfScreen(screen)
 				Atom actual_type;
 				int actual_format;
 				unsigned long nitems, bytesafter;
-				Window *newRoot = (Window *)0;
+				unsigned char *newRoot = 0;
 
 				if (XGetWindowProperty(dpy, children[i],
 					__SWM_VROOT, 0, 1, False, XA_WINDOW,
 					&actual_type, &actual_format,
 					&nitems, &bytesafter,
-					(unsigned char **) &newRoot) == Success
+					&newRoot) == Success
 				    && newRoot) {
-				    root = *newRoot;
+				    root = *((Window *) newRoot);
 				    break;
 				}
 			}
