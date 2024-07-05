@@ -7,7 +7,7 @@
 #include "vroot.h"
 #include "flying-toasters.h"
 
-#define TOASTER_SPRITE_COUNT 4
+#define TOASTER_SPRITE_COUNT 6
 #define TOASTER_COUNT 10
 #define TOAST_COUNT 6
 #define SPRITE_SIZE 64
