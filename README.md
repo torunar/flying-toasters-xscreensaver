@@ -7,8 +7,14 @@ Classic [After Dark](https://en.wikipedia.org/wiki/After_Dark_(software)) screen
 ## Installation
 
 1. Install XScreensaver. Check your distribution instructions on how to do it.
-2. Download [flying-toasters](https://github.com/torunar/flying-toasters-xscreensaver/releases/latest) anywhere on your computer, for example `/usr/local/bin/flying-toasters`.
-3. Add path to `flying-toasters` executable to the `programs` section in `~/.xscreensaver`. It should look like this:
+2. Download the [latest release binary](https://github.com/torunar/flying-toasters-xscreensaver/releases/latest) anywhere on your computer, for example `/usr/local/bin/flying-toasters`.
+    * x86-64 users: use `flying-toasters-amd64`
+    * ARM users (Raspberry Pi): use `flying-toasters-arm64`
+3. Make it executable: 
+    ```
+    $ chmod +x /usr/local/bin/flying-toasters
+    ```
+4. Add path to `flying-toasters` executable to the `programs` section in `~/.xscreensaver`. It should look like this:
     ```
     programs:                                                                     \
                                     maze -root                                  \n\
@@ -21,6 +27,6 @@ Classic [After Dark](https://en.wikipedia.org/wiki/After_Dark_(software)) screen
 
 ## Building locally
 
-1. Install `gcc` and `libx11-dev` and `libxpm-dev` libraries.
-2. Run `make build` from the source code directory to build from source.
-3. Built screensaver will be put into the `bin` directory. Type `make run` to preview it in windowed mode.
+1. Install Docker
+2. Run `make build` in the project directory.
+3. Run `make run` to preview the built screensaver.

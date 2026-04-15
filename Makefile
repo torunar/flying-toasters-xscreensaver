@@ -1,13 +1,14 @@
 build: init clean
-	gcc -o bin/flying-toasters src/flying-toasters.c -L/usr/lib -lX11 -lXpm -s -W -Wall
+	docker build . -o bin
+	chmod +x bin/*
 
 clean:
-	rm -f bin/flying-toasters
+	rm -f bin/*
 
 init:
 	mkdir -p bin
 
-run:
-	./bin/flying-toasters -windowed
+run: build
+	./bin/flying-toasters-amd64 -windowed
 
 all: build run
